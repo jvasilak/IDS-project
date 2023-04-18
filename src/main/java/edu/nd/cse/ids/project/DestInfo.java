@@ -36,27 +36,27 @@ public class DestInfo {
 				return (double) population;
 		}
 
-		private double getNormalizedLongitude() {
+		public double getNormalizedLongitude() {
 				return this.normalizedLongitude;	
 		}
 
-		private double getNormalizedLatitude() {
+		public double getNormalizedLatitude() {
 				return this.normalizedLatitude;
 		}
 
-		private double getNormalizedPopulation() {
+		public double getNormalizedPopulation() {
 				return this.normalizedPopulation;
 		}
 
-		private double getLongitude() {
+		public double getLongitude() {
 			return this.longitude;
 		}
 
-		private double getLatitude() {
+		public double getLatitude() {
 			return this.latitude;
 		}
 
-		private int getPopulation() {
+		public int getPopulation() {
 			return this.population;
 		}
 }
