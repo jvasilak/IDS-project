@@ -23,17 +23,31 @@ public class DestInfo {
 				this.normalizedPopulation = this.normalizePopulation(population);
 		}
 		
+		// Normalize long/lat functions and values are obsolete at the moment, delete if still obsolete once project is complete
 		private double normalizeLongitude(double longitude) {
-				return (longitude + 180) / 360;
+				return (longitude);// / 360;
 		}
 
 		private double normalizeLatitude(double latitude) {
-				return (latitude + 90) / 180; 
+				return (latitude);// / 180;
 		}
 
 		private double normalizePopulation(int population) {
-				// TODO: figure out equation for normalizing population
-				return (double) population;
+				// TODO: figure out more sophisticated equation for normalizing population, keep the max value to return 1 but all other values less should return a different number
+				// currently returns 1 if the population is over 10million, depending on how the data counts city population, this number should be tweaked
+				if (population > 10000000) {
+					return 1.0;
+				} else if (population > 5000000) {
+					return 0.8;
+				} else if (population > 2000000) {
+					return 0.6;
+				} else if (population > 700000) {
+					return 0.4;
+				} else if (population > 200000) {
+					return 0.2;
+				} else {
+					return 0.05;
+				}
 		}
 
 		public double getNormalizedLongitude() {

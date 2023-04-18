@@ -13,16 +13,12 @@ public class Main {
 
 		public static double coordCosineDistance(DestInfo d1, DestInfo d2) {
 			List<Double> c1 = new ArrayList();
-			c1.add(d1.getNormalizedLongitude());
-			c1.add(d1.getNormalizedLatitude());
+			c1.add(d1.getLongitude());
+			c1.add(d1.getLatitude());
 
 			List<Double> c2 = new ArrayList();
-			c2.add(d2.getNormalizedLongitude());
-			c2.add(d2.getNormalizedLatitude());
-			/*
-			 I need the dot product and the sum norm of both vectors
-			 
-			 */
+			c2.add(d2.getLongitude());
+			c2.add(d2.getLatitude());
 			// Calculate dot product
 			double dotProduct = 0;
 			assert c1.size() == c2.size();
@@ -34,12 +30,12 @@ public class Main {
 			double c1Mag = Math.sqrt(Math.pow(c1.get(0).doubleValue(), 2) + Math.pow(c1.get(1).doubleValue(), 2));
 			double c2Mag = Math.sqrt(Math.pow(c2.get(0).doubleValue(), 2) + Math.pow(c2.get(1).doubleValue(), 2));
 
-			return dotProduct / (c1Mag * c2Mag);
+			return ((dotProduct / (c1Mag * c2Mag)) + 1) / 2;
 		}
 
-		//public List<Double> createInfoVector() {
-
-		//}
+		public static double populationCosineDistance(DestInfo d1, DestInfo d2) {
+			return 1.0;
+		}
 
     public static void main(String[] args) throws IOException {
 
