@@ -1,4 +1,5 @@
 package edu.nd.cse.ids.project;
+import edu.nd.cse.ids.project.messages.*;
 
 import org.apache.commons.cli.*;
 
@@ -96,23 +97,12 @@ public class Main {
 	public List<String> describeDestination(DestInfo d1)
     {
         DocumentPlanner docplanner = new DocumentPlanner();
-        
         docplanner.createMessage(d1, 1);
-        
         List<Message> documentPlan = docplanner.getMessages();
-        // -------------------------------------------
-        MicroPlanner microplanner1 = new MicroPlannerStyleZero();
-
-        MicroPlanner microplanner2 = new MicroPlannerStyleOne();
+		MicroPlanner microplanner = new MicroPlanner();
         List<SPhraseSpec> sentences;
-        if(styleid == 0) {
-            sentences = microplanner1.lexicalize(documentPlan);
-        } else {
-            sentences = microplanner2.lexicalize(documentPlan);
-        }
-    
-        Realizer realizer = new Realizer();
-        
+		sentences = microplanner.lexicalize(documentPlan);
+        Realizer realizer = new Realizer();        
         return(realizer.realize(sentences));
     }
 

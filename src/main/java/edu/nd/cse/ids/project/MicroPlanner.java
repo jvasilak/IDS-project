@@ -34,6 +34,14 @@ public class MicroPlanner {
     
     public SPhraseSpec handleDescribeDestinationMessage(DescribeDestinationMessage message) {
         SPhraseSpec s1 = this.nlgFactory.createClause();
+        String populationString = Integer.toString(message.getPopulation());
+        String longString = Double.toString(message.getLongitude());
+        String latString = Double.toString(message.getLatitude());
+        WordElement we_place = new WordElement("place", LexicalCategory.NOUN);
+        WordElement we_sounds = new WordElement("sound", LexicalCategory.VERB);
+        WordElement we_good = new WordElement("good", LexicalCategory.ADJECTIVE);
+        WordElement we_destination = new WordElement("destination", LexicalCategory.NOUN);
+        
         return s1;
     }
 }
