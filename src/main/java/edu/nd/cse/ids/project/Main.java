@@ -9,107 +9,156 @@ import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.List;
 
+import simplenlg.framework.*;
+import simplenlg.lexicon.*;
+import simplenlg.realiser.english.*;
+import simplenlg.phrasespec.*;
+import simplenlg.features.*;
+
+
 public class Main {
-		private DestInfoReader reader;
+	private DestInfoReader reader;
 
-		public Main() {
-			this.reader = new DestInfoReader();
-		}
+	public Main() {
+		this.reader = new DestInfoReader();
+	}
 
-		public DestInfo findMatch(DestInfo userDest) {
-			double minDistance = Double.MAX_VALUE; // set to a value higher than the max distance
-			double currDistance;
-			DestInfo bestMatch = userDest;
-			for(DestInfo curr: this.reader.getDestinations()) {
-            	currDistance = compareDestinations(userDest, curr);
-				if (currDistance < minDistance) {
-					minDistance = currDistance;
-					bestMatch = curr;
-				}
-        	}
-			return bestMatch;
-		}
-
-		public static double compareDestinations(DestInfo d1, DestInfo d2) {	
-			return (coordComparison(d1, d2) + populationComparison(d1, d2) + textComparison(d1, d2)) / 3;
-		}
-
-		public static double coordComparison(DestInfo d1, DestInfo d2) {
-			List<Double> c1 = new ArrayList();
-			c1.add(d1.getLongitude());
-			c1.add(d1.getLatitude());
-
-			List<Double> c2 = new ArrayList();
-			c2.add(d2.getLongitude());
-			c2.add(d2.getLatitude());
-			// Calculate dot product
-			double dotProduct = 0;
-			assert c1.size() == c2.size();
-			for (int i = 0; i < c1.size(); i++) {
-				dotProduct += c1.get(i) * c2.get(i);
+	public DestInfo findMatch(DestInfo userDest) {
+		double maxSimilarity = -1;
+		double currSimilarity;
+		DestInfo bestMatch = userDest;
+		for(DestInfo curr: this.reader.getDestinations()) {
+			currSimilarity = compareDestinations(userDest, curr, this.reader);
+			if (currSimilarity > maxSimilarity) {
+				maxSimilarity = currSimilarity;
+				bestMatch = curr;
 			}
+		}
+		return bestMatch;
+	}
 
-			// Calculate magnitudes of c1 and c2
-			double c1Mag = Math.sqrt(Math.pow(c1.get(0).doubleValue(), 2) + Math.pow(c1.get(1).doubleValue(), 2));
-			double c2Mag = Math.sqrt(Math.pow(c2.get(0).doubleValue(), 2) + Math.pow(c2.get(1).doubleValue(), 2));
+	public static double compareDestinations(DestInfo d1, DestInfo d2, DestInfoReader reader) {	
+		// right now we want highest return value, a value of 1 for coordinates and population means they are identical so try to emulate the same thing with text comparison
+		return (coordComparison(d1, d2) + populationComparison(d1, d2, reader) + textComparison(d1, d2)) / 3;
+	}
 
-			return ((dotProduct / (c1Mag * c2Mag)) + 1) / 2;
+	public static double coordComparison(DestInfo d1, DestInfo d2) {
+		List<Double> c1 = new ArrayList();
+		c1.add(d1.getLongitude());
+		c1.add(d1.getLatitude());
+
+		List<Double> c2 = new ArrayList();
+		c2.add(d2.getLongitude());
+		c2.add(d2.getLatitude());
+		// Calculate dot product
+		double dotProduct = 0;
+		assert c1.size() == c2.size();
+		for (int i = 0; i < c1.size(); i++) {
+			dotProduct += c1.get(i) * c2.get(i);
 		}
 
-		public static double populationComparison(DestInfo d1, DestInfo d2) {
-			
-			return 1.0;
+		// Calculate magnitudes of c1 and c2
+		double c1Mag = Math.sqrt(Math.pow(c1.get(0).doubleValue(), 2) + Math.pow(c1.get(1).doubleValue(), 2));
+		double c2Mag = Math.sqrt(Math.pow(c2.get(0).doubleValue(), 2) + Math.pow(c2.get(1).doubleValue(), 2));
+
+		return ((dotProduct / (c1Mag * c2Mag)) + 1) / 2;
+	}
+
+	public static double populationComparison(DestInfo d1, DestInfo d2, DestInfoReader reader) {
+		double mean = reader.getMeanPopulation();
+		double stdev = reader.getStdevPopulation();
+		double z1 = (d1.getPopulation() - mean) / stdev;
+		double z2 = (d2.getPopulation() - mean) / stdev;
+		// simplifies calculation by accounting for outlier cities with massive populations or places with incredibly low populations
+		// assumes the distribution of populations is skewed so that there are a lot more places with very low populations than high ones
+		if(z1 > 3) {
+			z1 = 3;
+		} else if (z1 < -2) {
+			z1 = -2;
 		}
 
-		public static double textComparison(DestInfo d1, DestInfo d2) {
-			// do this once the text data has been saved
-			return 1.0;
+		if(z2 > 3) {
+			z2 = 3;
+		} else if (z2 < -2) {
+			z2 = -2;
 		}
+		double distance = Math.abs(z1 - z2);
+		distance =  ((distance - 5) / 5) * -1;
+
+		return distance;
+	}
+
+	public static double textComparison(DestInfo d1, DestInfo d2) {
+		// TODO: do this once the text data has been saved
+		return 1.0;
+	}
+
+	public List<String> describeDestination(DestInfo d1)
+    {
+        DocumentPlanner docplanner = new DocumentPlanner();
+        
+        docplanner.createMessage(d1, 1);
+        
+        List<Message> documentPlan = docplanner.getMessages();
+        // -------------------------------------------
+        MicroPlanner microplanner1 = new MicroPlannerStyleZero();
+
+        MicroPlanner microplanner2 = new MicroPlannerStyleOne();
+        List<SPhraseSpec> sentences;
+        if(styleid == 0) {
+            sentences = microplanner1.lexicalize(documentPlan);
+        } else {
+            sentences = microplanner2.lexicalize(documentPlan);
+        }
+    
+        Realizer realizer = new Realizer();
+        
+        return(realizer.realize(sentences));
+    }
 
     public static void main(String[] args) throws IOException {
+		// Reading from command line
+		Main m1 = new Main();
+		Scanner s1 = new Scanner(System.in);
+		double latitude = 0;
+		while (true) {
+			System.out.print("Enter your desired destination latitude: ");
+			latitude = s1.nextDouble();
+			if(latitude <= 90 && latitude >= -90) {
+				break;
+			} else {
+				System.out.println("Invalid input! Please make sure to enter a valid value.");
+			}
+		}
+		double longitude = 0;
+		while (true) {
+			System.out.print("Enter your desired destination longitude: ");
+			longitude = s1.nextDouble();
+			if(longitude <= 180 && longitude >= -180) {
+				break;
+			} else {
+				System.out.println("Invalid input! Please make sure to enter a valid value.");
+			}
+		}
+		int population = 0;
+		while (true) {
+			System.out.print("Enter your desired destination population: ");
+			population = s1.nextInt();
+			if(population > 0) {
+				break;
+			} else {
+				System.out.println("Invalid input! Please make sure to enter a valid value.");
+			}
+		}
+	
+		System.out.println("Describe your desired destination: ");
+		String description = s1.nextLine();    
 
-			// Reading from command line
-			Main m1 = new Main();
-			Scanner s1 = new Scanner(System.in);
-			double latitude = 0;
-			while (true) {
-				System.out.print("Enter your desired destination latitude: ");
-				latitude = s1.nextDouble();
-				if(latitude <= 90 && latitude >= -90) {
-					break;
-				} else {
-					System.out.println("Invalid input! Please make sure to enter a valid value.");
-				}
-			}
-			double longitude = 0;
-			while (true) {
-				System.out.print("Enter your desired destination longitude: ");
-				longitude = s1.nextDouble();
-				if(longitude <= 180 && longitude >= -180) {
-					break;
-				} else {
-					System.out.println("Invalid input! Please make sure to enter a valid value.");
-				}
-			}
-			int population = 0;
-			while (true) {
-				System.out.print("Enter your desired destination population: ");
-				population = s1.nextInt();
-				if(population > 0) {
-					break;
-				} else {
-					System.out.println("Invalid input! Please make sure to enter a valid value.");
-				}
-			}
+		DestInfo userSpecs = new DestInfo(longitude, latitude, population, description);
 		
-			System.out.println("Describe your desired destination: ");
-			String description = s1.nextLine();    
+		DestInfo foundDestination = m1.findMatch(userSpecs);
+		// TODO: output desired destination just found
 
-			DestInfo userSpecs = new DestInfo(longitude, latitude, population, description);
-			
-			// TODO: find and output desired destination based on the user specifications
-			DestInfo foundDestination = m1.findMatch(userSpecs);
-
-			s1.close();
+		s1.close();
     }
 }
