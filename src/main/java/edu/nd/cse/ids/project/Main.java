@@ -10,8 +10,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
+		private DestInfoReader reader;
 
-		public static double coordCosineDistance(DestInfo d1, DestInfo d2) {
+		public Main() {
+			this.reader = new DestInfoReader();
+		}
+
+		public DestInfo findMatch(DestInfo userDest) {
+			double minDistance = Double.MAX_VALUE; // set to a value higher than the max distance
+			double currDistance;
+			DestInfo bestMatch = userDest;
+			for(DestInfo curr: this.reader.getDestinations()) {
+            	currDistance = compareDestinations(userDest, curr);
+				if (currDistance < minDistance) {
+					minDistance = currDistance;
+					bestMatch = curr;
+				}
+        	}
+			return bestMatch;
+		}
+
+		public static double compareDestinations(DestInfo d1, DestInfo d2) {	
+			return (coordComparison(d1, d2) + populationComparison(d1, d2) + textComparison(d1, d2)) / 3;
+		}
+
+		public static double coordComparison(DestInfo d1, DestInfo d2) {
 			List<Double> c1 = new ArrayList();
 			c1.add(d1.getLongitude());
 			c1.add(d1.getLatitude());
@@ -33,35 +56,59 @@ public class Main {
 			return ((dotProduct / (c1Mag * c2Mag)) + 1) / 2;
 		}
 
-		public static double populationCosineDistance(DestInfo d1, DestInfo d2) {
+		public static double populationComparison(DestInfo d1, DestInfo d2) {
+			
+			return 1.0;
+		}
+
+		public static double textComparison(DestInfo d1, DestInfo d2) {
+			// do this once the text data has been saved
 			return 1.0;
 		}
 
     public static void main(String[] args) throws IOException {
 
 			// Reading from command line
+			Main m1 = new Main();
 			Scanner s1 = new Scanner(System.in);
-			System.out.print("Enter your desired destination latitude: ");
-			double latitude = s1.nextDouble();
-
-			System.out.print("Enter your desired destination longitude: ");
-			double longitude = s1.nextDouble();
-
-			System.out.print("Enter your desired destination population: ");
-			int population = s1.nextInt();
+			double latitude = 0;
+			while (true) {
+				System.out.print("Enter your desired destination latitude: ");
+				latitude = s1.nextDouble();
+				if(latitude <= 90 && latitude >= -90) {
+					break;
+				} else {
+					System.out.println("Invalid input! Please make sure to enter a valid value.");
+				}
+			}
+			double longitude = 0;
+			while (true) {
+				System.out.print("Enter your desired destination longitude: ");
+				longitude = s1.nextDouble();
+				if(longitude <= 180 && longitude >= -180) {
+					break;
+				} else {
+					System.out.println("Invalid input! Please make sure to enter a valid value.");
+				}
+			}
+			int population = 0;
+			while (true) {
+				System.out.print("Enter your desired destination population: ");
+				population = s1.nextInt();
+				if(population > 0) {
+					break;
+				} else {
+					System.out.println("Invalid input! Please make sure to enter a valid value.");
+				}
+			}
 		
-			// TODO: read a string describing the desired city destination	
+			System.out.println("Describe your desired destination: ");
+			String description = s1.nextLine();    
+
+			DestInfo userSpecs = new DestInfo(longitude, latitude, population, description);
 			
-
-			DestInfo userSpecs = new DestInfo(longitude, latitude, population, "Warm");
-			DestInfo d2 = new DestInfo(123, 12, 1000000, "Cold");
-			double dist = coordCosineDistance(userSpecs, d2);
-
-			System.out.println("Normalized lat: " + userSpecs.getNormalizedLatitude() + "Normalized long" + userSpecs.getNormalizedLongitude());
-			System.out.println("Normalized lat: " + d2.getNormalizedLatitude() + "Normalized long" + d2.getNormalizedLongitude());
-			System.out.println("Cosine dist: " + dist);
 			// TODO: find and output desired destination based on the user specifications
-			
+			DestInfo foundDestination = m1.findMatch(userSpecs);
 
 			s1.close();
     }

@@ -33,7 +33,7 @@ public class DestInfo {
 		}
 
 		private double normalizePopulation(int population) {
-				// TODO: figure out more sophisticated equation for normalizing population, keep the max value to return 1 but all other values less should return a different number
+				// do zscore of the population value in the distribution of the dataset, with something that limits the zscore to a certain number, then divide by that number
 				// currently returns 1 if the population is over 10million, depending on how the data counts city population, this number should be tweaked
 				if (population > 10000000) {
 					return 1.0;
@@ -73,4 +73,14 @@ public class DestInfo {
 		public int getPopulation() {
 			return this.population;
 		}
+
+		public String getDescription() {
+			return this.description;
+		}
+
+		/*
+		public ? getVectorizedDescription() {
+			return this.vectorizedDescription;
+		}
+		 */
 }
