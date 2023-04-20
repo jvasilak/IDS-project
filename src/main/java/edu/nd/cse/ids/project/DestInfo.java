@@ -11,9 +11,10 @@ public class DestInfo {
 		private double latitude;
 		private int population;
 		private String description;
+		private String name;
 		// add vectorized description parameter
 
-		public DestInfo(double longitude, double latitude, int population, String description) {
+		public DestInfo(double longitude, double latitude, int population, String description, String name) {
 				this.description = description;
 				this.latitude = latitude;
 				this.longitude = longitude;
@@ -21,6 +22,7 @@ public class DestInfo {
 				this.normalizedLongitude = this.normalizeLongitude(longitude);
 				this.normalizedLatitude = this.normalizeLatitude(latitude);
 				this.normalizedPopulation = this.normalizePopulation(population);
+				this.name = name;
 		}
 		
 		// Normalize long/lat functions and values are obsolete at the moment, delete if still obsolete once project is complete
@@ -32,6 +34,7 @@ public class DestInfo {
 				return (latitude);// / 180;
 		}
 
+		// also obsolete at the moment
 		private double normalizePopulation(int population) {
 				// do zscore of the population value in the distribution of the dataset, with something that limits the zscore to a certain number, then divide by that number
 				// currently returns 1 if the population is over 10million, depending on how the data counts city population, this number should be tweaked
@@ -76,6 +79,10 @@ public class DestInfo {
 
 		public String getDescription() {
 			return this.description;
+		}
+
+		public String getName() {
+			return this.name;
 		}
 
 		/*

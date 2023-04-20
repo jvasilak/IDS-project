@@ -7,6 +7,7 @@ public class DescribeDestinationMessage extends Message {
 	private double longitude;
 	private int population;
 	private String description;
+	private String name;
 
 	public DescribeDestinationMessage() {}
 
@@ -15,6 +16,7 @@ public class DescribeDestinationMessage extends Message {
 		setLatitude(d1.getLatitude());
 		setPopulation(d1.getPopulation());
 		setDescription(d1.getDescription());
+		setName(d1.getName());
     }
 
 	public void setLatitude(double latitude) {
@@ -33,6 +35,10 @@ public class DescribeDestinationMessage extends Message {
 		this.description = desc;
 	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public double getLatitude() {
 		return this.latitude;
 	}
@@ -47,5 +53,9 @@ public class DescribeDestinationMessage extends Message {
 
 	public String getDescription() {
 		return this.description;
+	}
+
+	public String getName() {
+		return this.name;
 	}
 }

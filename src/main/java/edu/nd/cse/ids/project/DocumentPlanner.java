@@ -22,7 +22,7 @@ public class DocumentPlanner
             m1.setLongitude(d1.getLongitude());
             m1.setLatitude(d1.getLatitude());
             m1.setLongitude(d1.getPopulation());
-            //m1.setDescription(d1.getDesrciption());
+            m1.setDescription(d1.getDescription());
             this.messages.add(m1);
         }
          

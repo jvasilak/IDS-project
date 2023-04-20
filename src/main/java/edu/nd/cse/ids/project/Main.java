@@ -94,7 +94,7 @@ public class Main {
 		return 1.0;
 	}
 
-	public List<String> describeDestination(DestInfo d1)
+	public static List<String> describeDestination(DestInfo d1)
     {
         DocumentPlanner docplanner = new DocumentPlanner();
         docplanner.createMessage(d1, 1);
@@ -144,11 +144,17 @@ public class Main {
 		System.out.println("Describe your desired destination: ");
 		String description = s1.nextLine();    
 
-		DestInfo userSpecs = new DestInfo(longitude, latitude, population, description);
+		DestInfo userSpecs = new DestInfo(longitude, latitude, population, description, "NULL");
 		
 		DestInfo foundDestination = m1.findMatch(userSpecs);
 		// TODO: output desired destination just found
-
+		List<String> destinationDescription = describeDestination(foundDestination);
+		destDescString = "Here is a description of " + foundDestination.getName() + ":";
+		destinationDescription.add(destDescString);
+		destinationDescription.add(foundDestination.getDescription());
+		for(String sentence: destinationDescription) {
+			System.out.println(sentence);
+		}
 		s1.close();
     }
 }
