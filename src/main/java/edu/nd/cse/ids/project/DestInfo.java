@@ -2,6 +2,8 @@ package edu.nd.cse.ids.project;
 
 import org.apache.commons.cli.*;
 
+import com.opencsv.bean.CsvBindByName;
+
 public class DestInfo {
 
 		private double normalizedLongitude;
