@@ -1,2 +1,2 @@
 # IDS-project
-# Jonathon Vasilak and Joseph Capdeviele
+# Jonathon Vasilak and Joseph Capdevielle
