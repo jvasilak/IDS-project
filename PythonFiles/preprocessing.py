@@ -17,6 +17,7 @@ title = ''
 
 
 outfile = open("../data/data.csv", "w")
+outfile.write('name,description,latitude,longitude')
 
 try:
 	datfile = open("../data/enwikivoyage-latest-pages-meta-current.xml", "r")
