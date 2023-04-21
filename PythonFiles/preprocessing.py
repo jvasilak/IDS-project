@@ -5,6 +5,7 @@ latlong = re.compile('{{Mapframe\|(\d+\.?\d*)\|(\d+\.?\d*)')
 
 # This multiline one would work but would require loading in an unknown number of lines from the file: 'pagebanner.*?\n(.*?)(?<!Understand)==(?!Understand)' with /s flag on
 
+desc_title = re.compile('<title>(.*?)</title>')
 desc_begin = re.compile('pagebanner')
 desc_head = re.compile('==Understand==')
 desc_end = re.compile('==(?!Understand)') #Matches any section heading except the 'Understand' heading that we want to include in the description.
@@ -12,7 +13,7 @@ desc_end = re.compile('==(?!Understand)') #Matches any section heading except th
 
 add = False
 outlist = []
-
+title = ''
 
 
 outfile = open("../data/data.csv", "w")
@@ -22,6 +23,11 @@ try:
 
 	for datline in datfile:
 		dattext = datline.rstrip()
+
+		#find title
+		title_re = desc_title.search(dattext)
+		if title_re:
+			title = title_re.group(1)
 
 		#skip understand heading
 		head = desc_head.match(dattext)
@@ -51,6 +57,9 @@ try:
 			outfile.write(outtext)
 			print(outtext)
 			outlist = []
+			
+			outlist.append(title)
+			outlist.append(',')
 
 			add = True
 			continue
