@@ -14,11 +14,11 @@ public class DestInfo {
 		private String name;
 		// add vectorized description parameter
 
-		public DestInfo(double longitude, double latitude, int population, String description, String name) {
+		public DestInfo(String name, String description, double longitude, double latitude, /*int population,*/) {
 				this.description = description;
 				this.latitude = latitude;
 				this.longitude = longitude;
-				this.population = population;
+				this.population = 0;//population;
 				this.normalizedLongitude = this.normalizeLongitude(longitude);
 				this.normalizedLatitude = this.normalizeLatitude(latitude);
 				this.normalizedPopulation = this.normalizePopulation(population);
