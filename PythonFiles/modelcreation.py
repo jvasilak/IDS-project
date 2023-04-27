@@ -66,6 +66,10 @@ testing_tags = [x[1] for x in testing_data]
 tokenizer = Tokenizer(num_words=VOCAB_SIZE, oov_token="UNK")
 tokenizer.fit_on_texts(training_texts)
 
+tokenizer_output = tokenizer.to_json()
+with open('../data/destination_tok.json', 'w', encoding='utf-8') as output:
+    output.write(tokenizer_output)
+
 num_labels = len(tokenizer.word_index) + 1
 
 x_train = tokenizer.texts_to_sequences(training_texts)
