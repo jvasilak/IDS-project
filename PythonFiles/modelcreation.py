@@ -3,6 +3,7 @@ import random
 import re
 import tensorflow as tf
 import numpy as np
+import pickle
 
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
@@ -51,18 +52,12 @@ testing_data = data[int(0.85*len(data)):]
 training_data = reprocess(training_data)
 testing_data = reprocess(testing_data)
 
-training_texts = [x[0] for x in training_data]
-testing_texts = [x[0] for x in testing_data]
-
-training_tags = [x[1] for x in training_data]
-testing_tags = [x[1] for x in testing_data]
-
-tokenizer = Tokenizer(num_words=VOCAB_SIZE, oov_token="UNK")
-tokenizer.fit_on_texts(training_texts)
-
 tokenizer_output = tokenizer.to_json()
 with open('../data/destination_tok.json', 'w', encoding='utf-8') as output:
     output.write(tokenizer_output)
+
+with open('../data/destination_tok.pkl', 'r', encoding='utf-8') as tokenizer_file:
+   tokenizer = pickle.load(tokenizer_file) 
 
 num_labels = len(tokenizer.word_index) + 1
 
