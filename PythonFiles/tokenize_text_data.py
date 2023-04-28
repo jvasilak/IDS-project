@@ -1,6 +1,7 @@
 import json
 import random
 import re
+import pickle
 import tensorflow as tf
 import numpy as np
 
@@ -13,7 +14,7 @@ from tensorflow.keras.layers import Activation, Dense, Dropout, LSTM, Embedding,
 
 
 random.seed(1738)
-
+quit()
 VOCAB_SIZE = 10000
 MAX_TEXT_LEN = 125
 OUTPUT_LEN = 200
@@ -64,55 +65,6 @@ tokenizer_output = tokenizer.to_json()
 with open('../data/destination_tok.json', 'w', encoding='utf-8') as output:
     output.write(tokenizer_output)
 
-num_labels = len(tokenizer.word_index) + 1
 
-x_train = tokenizer.texts_to_sequences(training_texts)
-x_test = tokenizer.texts_to_sequences(testing_texts)
-
-x_train = pad_sequences(x_train, padding="post", truncating="pre", maxlen=MAX_TEXT_LEN)
-x_test = pad_sequences(x_test, padding="post", truncating="pre", maxlen=MAX_TEXT_LEN)
-
-y_train = list()
-for t in training_tags:
-   try:
-      t = tokenizer.word_index[t]
-   except KeyError:
-      t = tokenizer.word_index['UNK']
-   t = to_categorical(t, num_classes=num_labels)
-   y_train.append(t)
-y_train = np.asarray(y_train)
-
-y_test = list()
-for t in testing_tags:
-   try:
-      t = tokenizer.word_index[t]
-   except KeyError:
-      t = tokenizer.word_index['UNK']
-   t = to_categorical(t, num_classes=num_labels)
-   y_test.append(t)
-y_test = np.asarray(y_test)
-
-model = Sequential()
-
-model.add(Embedding(VOCAB_SIZE, OUTPUT_LEN, input_length=MAX_TEXT_LEN))
-model.add(Masking()) # don't need this
-model.add(LSTM(OUTPUT_LEN, return_sequences=True))
-model.add(Flatten()) # output I care about, model surgery
-model.add(Dropout(0.2))
-model.add(Dense(num_labels, activation='softmax'))
-
-model.summary()
-
-model.compile(loss='categorical_crossentropy',
-            optimizer='adam',
-            metrics=['accuracy'])
-
-K.set_value(model.optimizer.learning_rate, 0.001)
-batch_size = 100 # do max it can handle
-history = model.fit(x_train, y_train,
-                  batch_size=batch_size,
-                  epochs=4,
-                  verbose=1,
-                  validation_split=0.01)
-
-model.save('../data/destinations_lstm.h5')
+with open('../data/destination_tok.pkl', 'wb') as handle:
+   pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
