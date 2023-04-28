@@ -14,7 +14,7 @@ from tensorflow.keras.layers import Activation, Dense, Dropout, LSTM, Embedding,
 
 
 random.seed(1738)
-quit()
+
 VOCAB_SIZE = 10000
 MAX_TEXT_LEN = 125
 OUTPUT_LEN = 200
