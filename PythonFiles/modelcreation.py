@@ -49,8 +49,18 @@ random.shuffle(data)
 training_data = data[:int(0.85*len(data))]
 testing_data = data[int(0.85*len(data)):]
 
+
 training_data = reprocess(training_data)
 testing_data = reprocess(testing_data)
+
+training_texts = [x[0] for x in training_data]
+testing_texts = [x[0] for x in testing_data]
+
+training_tags = [x[1] for x in training_data]
+testing_tags = [x[1] for x in testing_data]
+
+tokenizer = Tokenizer(num_words=VOCAB_SIZE, oov_token="UNK")
+tokenizer.fit_on_texts(training_texts)
 
 tokenizer_output = tokenizer.to_json()
 with open('../data/destination_tok.json', 'w', encoding='utf-8') as output:
