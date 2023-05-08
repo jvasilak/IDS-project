@@ -66,5 +66,5 @@ with open('../data/destination_tok.json', 'w', encoding='utf-8') as output:
     output.write(tokenizer_output)
 
 
-with open('../data/destination_tok.pkl', 'wb') as handle:
+with open('../data/destination_tok.pkl', 'wb', encoding='utf-8') as handle:
    pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
