@@ -17,7 +17,7 @@ random.seed(1738)
 
 VOCAB_SIZE = 10000
 MAX_TEXT_LEN = 125
-OUTPUT_LEN = 200
+OUTPUT_LEN = 125
 
 def reprocess(data):
     new_data = list()
@@ -46,8 +46,8 @@ with open('../data/gpt-data.json', 'r') as loaded_data:
 random.shuffle(data)
 
 # Separate into training/testing/validation
-training_data = data[:int(0.85*len(data))]
-testing_data = data[int(0.85*len(data)):]
+training_data = data[:int(0.2*0.85*len(data))]
+testing_data = data[int(0.2*0.85*len(data)):int(0.2*len(data))]
 
 
 training_data = reprocess(training_data)
@@ -99,8 +99,13 @@ y_test = np.asarray(y_test)
 
 model = Sequential()
 
+checkpoint_path = "../data/destinations_lstm_weights.{epoch:02d}.h5"
+checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path,
+                                                         save_weights_only=True,
+                                                         verbose=1)
+
 model.add(Embedding(VOCAB_SIZE, OUTPUT_LEN, input_length=MAX_TEXT_LEN))
-model.add(Masking()) # don't need this
+#model.add(Masking()) # don't need this
 model.add(LSTM(OUTPUT_LEN, return_sequences=True))
 model.add(Flatten()) # output I care about, model surgery
 model.add(Dropout(0.2))
@@ -116,8 +121,9 @@ K.set_value(model.optimizer.learning_rate, 0.001)
 batch_size = 100 # do max it can handle
 history = model.fit(x_train, y_train,
                   batch_size=batch_size,
-                  epochs=4,
+                  epochs=1,
                   verbose=1,
-                  validation_split=0.01)
+                  validation_split=0.01,
+                  callbacks=[checkpoint_callback])
 
 model.save('../data/destinations_lstm.h5')
