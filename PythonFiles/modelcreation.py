@@ -46,9 +46,8 @@ with open('../data/gpt-data.json', 'r') as loaded_data:
 random.shuffle(data)
 
 # Separate into training/testing/validation
-training_data = data[:int(0.2*0.85*len(data))]
-testing_data = data[int(0.2*0.85*len(data)):int(0.2*len(data))]
-
+training_data = data[:int(0.85*len(data))]
+testing_data = data[int(0.85*len(data)):]
 
 training_data = reprocess(training_data)
 testing_data = reprocess(testing_data)
@@ -59,14 +58,7 @@ testing_texts = [x[0] for x in testing_data]
 training_tags = [x[1] for x in training_data]
 testing_tags = [x[1] for x in testing_data]
 
-tokenizer = Tokenizer(num_words=VOCAB_SIZE, oov_token="UNK")
-tokenizer.fit_on_texts(training_texts)
-
-tokenizer_output = tokenizer.to_json()
-with open('../data/destination_tok.json', 'w', encoding='utf-8') as output:
-    output.write(tokenizer_output)
-
-with open('../data/destination_tok.pkl', 'r', encoding='utf-8') as tokenizer_file:
+with open('../data/destination_tok.pkl', 'rb') as tokenizer_file:
    tokenizer = pickle.load(tokenizer_file) 
 
 num_labels = len(tokenizer.word_index) + 1
@@ -77,6 +69,7 @@ x_test = tokenizer.texts_to_sequences(testing_texts)
 x_train = pad_sequences(x_train, padding="post", truncating="pre", maxlen=MAX_TEXT_LEN)
 x_test = pad_sequences(x_test, padding="post", truncating="pre", maxlen=MAX_TEXT_LEN)
 
+# begin needed in loop
 y_train = list()
 for t in training_tags:
    try:
@@ -96,20 +89,15 @@ for t in testing_tags:
    t = to_categorical(t, num_classes=num_labels)
    y_test.append(t)
 y_test = np.asarray(y_test)
+# end of needed in loop
 
 model = Sequential()
 
-checkpoint_path = "../data/destinations_lstm_weights.{epoch:02d}.h5"
-checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path,
-                                                         save_weights_only=True,
-                                                         verbose=1)
-
 model.add(Embedding(VOCAB_SIZE, OUTPUT_LEN, input_length=MAX_TEXT_LEN))
-#model.add(Masking()) # don't need this
 model.add(LSTM(OUTPUT_LEN, return_sequences=True))
 model.add(Flatten()) # output I care about, model surgery
 model.add(Dropout(0.2))
-model.add(Dense(num_labels, activation='softmax'))
+model.add(Dense(VOCAB_SIZE, activation='softmax'))
 
 model.summary()
 
@@ -117,13 +105,36 @@ model.compile(loss='categorical_crossentropy',
             optimizer='adam',
             metrics=['accuracy'])
 
+checkpoint = tf.keras.callbacks.ModelCheckpoint("../data/destination_checkpoint.h5", save_weights_only=True, verbose=1)
+
 K.set_value(model.optimizer.learning_rate, 0.001)
-batch_size = 100 # do max it can handle
+batch_size = 30 # do max it can handle
+# also needed for loop
 history = model.fit(x_train, y_train,
                   batch_size=batch_size,
-                  epochs=1,
+                  epochs=4,
                   verbose=1,
                   validation_split=0.01,
-                  callbacks=[checkpoint_callback])
+                  callbacks=[checkpoint])
+# end of loop again
 
+'''
+for i in range(2):
+   y_train = list()
+   curr_tags = training_tags[int(0.025*i):int(0.025*(i+1))]
+   for t in curr_tags:
+      try:
+         t = tokenizer.word_index[t]
+      except KeyError:
+         t = tokenizer.word_index['UNK']
+      t = to_categorical(t, num_classes=num_labels)
+      y_train.append(t)
+   y_train = np.asarray(y_train)
+   history = model.fit(x_train, y_train,
+                  batch_size=batch_size,
+                  epochs=4,
+                  verbose=1,
+                  validation_split=0.01,
+                  callbacks=[checkpoint])
+'''
 model.save('../data/destinations_lstm.h5')
