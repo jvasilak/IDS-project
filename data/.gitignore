@@ -1,2 +1,3 @@
 # We need to ignore the data file because it is too big to add to github
 enwikivoyage-latest-pages-meta-current.xml
+model-small.h5
