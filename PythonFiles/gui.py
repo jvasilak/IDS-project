@@ -2,12 +2,16 @@ import json
 import tkinter as tk
 import tkinter.font as tkFont
 
+def get_response(input):
+    return input
 
 def long_lat_command():
     print("longlat selected")
 
 def submit_command():
     value = desc_input.get()
+    response = get_response(value)
+    output_message.config(text=response)
     print(value)
 
 window = tk.Tk()
@@ -107,7 +111,7 @@ ft = tkFont.Font(family='Times',size=10)
 output_message["font"] = ft
 output_message["fg"] = "#333333"
 output_message["justify"] = "center"
-output_message["text"] = "Output Here"
+output_message["text"] = ""
 output_message.place(x=100,y=340,width=431,height=61)
 
 # Start the GUI event loop
