@@ -1,9 +1,36 @@
 import json
+import pickle
 import tkinter as tk
+import tensorflow as tf
 import tkinter.font as tkFont
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+
+
+model = tf.keras.models.load_model('../data/destinations_lstm.h5')
+with open('../data/destination_tok.pkl', 'rb') as tokenizer_file:
+   tokenizer = pickle.load(tokenizer_file) 
 
 def get_response(input):
-    return input
+    output = list()
+    output.append('<s> ' + input)
+    consecutive_unks = 0
+    for i in range(150):
+        tokenized = tokenizer.texts_to_sequences(output)
+        outsampd = pad_sequences(tokenized, padding="post", truncating="pre", maxlen=125)
+
+
+        pred = model.predict(outsampd)
+
+        pred = pred.argmax(axis=1)[0]
+        if tokenizer.index_word[pred] == "UNK":
+            consecutive_unks += 1
+        else:
+            consecutive_unks = 0
+        if consecutive_unks >= 3:
+            break
+        output[0] = output[0] + ' ' + tokenizer.index_word[pred]
+    output = output[0][4:]
+    return output
 
 def long_lat_command():
     print("longlat selected")
@@ -13,6 +40,11 @@ def submit_command():
     response = get_response(value)
     output_message.config(text=response)
     print(value)
+
+model = tf.keras.models.load_model('../data/destinations_lstm.h5')
+model.summary()
+with open('../data/destination_tok.pkl', 'rb') as tokenizer_file:
+   tokenizer = pickle.load(tokenizer_file) 
 
 window = tk.Tk()
 window.title("TravelTip")
